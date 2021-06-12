@@ -86,7 +86,7 @@ plt.plot(np.real(frequency), np.imag(frequency), '.g', label = '1 KHz')
 plt.title("Cool Pole-Zero Plot")
 plt.xlabel("Real")
 plt.ylabel("Imaginary")
-plt.legend(loc='upper left')
+#plt.legend(loc='upper left')
 
 plt.grid()
 plt.show()
