@@ -9,6 +9,8 @@ b = [1, -1j]
 b = [1, -.707-.707j] #the coef of the equation zeros
 poles1 = [-4.440 + 4.440j, -4.440 - 4.440j, -1.083 + 0.0j ,0.5,-0.5 -0.9 , 0.9]
 zeros1 = [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j , 2, -2, -1/0.9 , 1/0.9]
+zeros1 = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
+poles1 = [1.        +0.j        , 0.38223938-0.24421252j]
 #poles1 = [-4.440 + 4.440j, -4.440 - 4.440j, -1.083 + 0.0j ]
 #zeros1 = [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j ]
 #zeros1 = [-1/0.5]
@@ -18,6 +20,8 @@ zeros = np.roots(b)
 
 coef_zeros = np.poly(zeros1) #to get the coefs from the roots(x,y location on the z plane)
 coef_poles = np.poly(poles1) #to get the coefs from the roots(x,y location on the z plane)
+coef_zeros = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
+coef_poles = [1.        +0.j        , 0.38223938-0.24421252j]
 print(coef_zeros,coef_poles)
 print("The poles are:  ", poles)
 print("The zeros are:  ", zeros)
@@ -127,7 +131,7 @@ H = np.polyval(coef_zeros, z) / np.polyval(coef_poles, z)
 # plot the magnitude of H vs frequency.  H is a complex number array.
 plt.figure()
 plt.subplot(121)
-plt.loglog(f, abs(H))
+plt.plot(f, abs(H))
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('Amplitude')
 plt.subplot(122)
