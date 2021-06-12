@@ -11,8 +11,8 @@ plt.plot(np.sin(theta), np.cos(theta), color = 'gray', linewidth=0.5)
 
 # plot x-y axis
 
-ax.axhline(y=0, color='gray', linewidth=1)
-ax.axvline(x=0, color='gray', linewidth=1)
+#ax.axhline(y=0, color='gray', linewidth=1)
+#ax.axvline(x=0, color='gray', linewidth=1)
 
 plt.title("Z Plane")
 plt.xlabel("Real")
