@@ -33,9 +33,9 @@ index= 0
 
 ResetButton=Button(label="Reset",button_type="danger")
 
-UndoButton=Button(label="Undo",button_type="warning")
-SaveButton=Button(label="Save",button_type="success")
-LoadButton=Button(label="Load",button_type="success")
+#UndoButton=Button(label="Undo",button_type="warning")
+ClearPoles=Button(label="Clear Poles",button_type="warning")
+ClearZeros=Button(label="Clear Poles",button_type="warning")
 
 w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
 z = np.exp(1j*w)
@@ -120,11 +120,11 @@ ZerosRenderer = fig.scatter(x='x', y='y', source=Zeros, color='red', size=10)
 
 # ZerosRenderer = fig.scatter(x=Zeros[0], y=Zeros[1], color='black', size=10)
 # PolesRenderer = fig.scatter(x=Poles[0], y=Poles[1], color='blue', size=10)
-
+draw_tool=0
 def addding_ZerosAndPloes(first,second):
-    draw_tool = PointDrawTool(renderers=[first,second], empty_value='blue')
-    fig.add_tools(draw_tool)
-    fig.toolbar.active_tap = draw_tool
+    draw_tool. PointDrawTool(renderers=[ZerosRenderer])
+fig.add_tools(draw_tool)
+fig.toolbar.active_tap = draw_tool
 
 
 def ChangeIndex(i):
@@ -137,6 +137,12 @@ def ChangeIndex(i):
         print("one")
         addding_ZerosAndPloes(PolesRenderer,ZerosRenderer)
     print("heey",Zeros.data['x'],Zeros.data['y'],Poles.data['x'],Poles.data['y'])
+
+def clearPoles(event):
+    Poles.Poles = {k: [] for k in Poles.data}
+    Poles = ColumnDataSource(dict(x=[],y=[]))
+ClearPoles.on_event(clearPoles)
+
 
 ZeroPoleChoose.on_click(ChangeIndex)
 addding_ZerosAndPloes(ZerosRenderer,PolesRenderer)

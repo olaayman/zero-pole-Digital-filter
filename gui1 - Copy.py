@@ -1,10 +1,9 @@
 from bokeh.core.enums import ButtonType, SizingMode
 from bokeh.core.property.numeric import Size
 from bokeh.io import show
-from bokeh.models import CustomJS, RadioGroup,Button,Span,Slider
+from bokeh.models import CustomJS, RadioGroup,Button,Span
 from bokeh.models import DataTable, TableColumn, PointDrawTool, ColumnDataSource
 from bokeh.models.annotations import Label
-from bokeh.models.widgets.groups import CheckboxGroup
 from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column
 from bokeh.layouts import row
@@ -14,12 +13,6 @@ import matplotlib.pyplot as plt
 
 
 Choosen="red"
-Checkboxs=[]
-
-Filters=CheckboxGroup(labels=Checkboxs)
-Filters.js_on_click(CustomJS(code="""
-    console.log('checkbox_group: active=' + this.active, this.toString())
-"""))
 LABELS = ["Zeros", "Poles"]
 ZeroPoleChoose = RadioGroup(labels=LABELS, active=0)
 ZeroPoleChoose.js_on_click(CustomJS(code="""
@@ -108,43 +101,13 @@ def Reset(event):
     #Zeros = ColumnDataSource(dict(x=[],y=[]))
 ResetButton.on_click(Reset)
 
-real_slider = Slider(start=-1, end=1, value=0, step=.01, title="Real")
-img_slider = Slider(start=-1, end=1, value=0, step=.01, title="Imaginary")
-
-#batata labsa tar7a 7lwa w jeba 7lwa
-def batata(attrname, old, new):
-    print(real_slider.value)
-real_slider.on_change('value', batata)
-
-
-####Don't touch 
-AddFilter=Button(label="Add Filter",button_type="success")
-def AddFilterFunc(event):
-    print("1")
-    curdoc().clear()
-    global Checkboxs
-    global Filters
-    text="Filter"+str(len(Checkboxs)+1)
-    Checkboxs.append(text)
-    Filters=CheckboxGroup(labels=Checkboxs,active=[len(Checkboxs)])
-    Filters.js_on_click(CustomJS(code="""
-    console.log('checkbox_group: active=' + this.active, this.toString())
-    """))
-    UpdateGUI()
-AddFilter.on_click(AddFilterFunc)
-
-##### ha2tlk ya btngana
-def UpdateGUI():
-    curdoc().clear()
-    x=column(ResetButton,ClearPoles,ClearZeros,real_slider,img_slider,AddFilter,Filters)
-    x2 = column(fig)
-    z=row(x , x2)
-    curdoc().add_root(row(z))
-
-UpdateGUI()
-
 
 #fig.grid()
+x=column(ZeroPoleChoose,ResetButton,ClearPoles,ClearZeros)
+
+x2 = column(fig)
+z=row(x , x2)
+curdoc().add_root(row(z))
 #show(ZeroPoleChoose)
 # p = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5), toolbar_location=None)
 # p.border_fill_color = 'white'
