@@ -1,26 +1,28 @@
 from bokeh.plotting import figure, output_file, show, Column
 from random import random
-from bokeh.models import Button
 from bokeh.palettes import RdYlBu3
 from bokeh.plotting import figure, curdoc
 from bokeh.core.enums import ButtonType, SizingMode
 from bokeh.core.property.numeric import Size
 from bokeh.io import show
-from bokeh.models import CustomJS, RadioGroup,Button,Span
+from bokeh.models import CustomJS, RadioGroup,Button,Span , Slider
 from bokeh.models import DataTable, TableColumn, PointDrawTool, ColumnDataSource
 from bokeh.models.annotations import Label
 from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column
 from bokeh.layouts import row
 from bokeh.layouts import grid
-from bokeh.events import MouseMove, Tap ,MouseLeave ,PressUp
+from bokeh.events import MouseMove, Tap ,MouseLeave 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 
 #Choosen="red"
-zeros_coef = []
-poles_coef = []
+zeros_coef = [1]
+poles_coef = [1]
+zero_filter_coef =[]
+pole_filter_coef =[]
+
 LABELS = ["Zeros", "Poles"]
 ZeroPoleChoose = RadioGroup(labels=LABELS, active=0)
 ZeroPoleChoose.js_on_click(CustomJS(code="""
@@ -35,15 +37,21 @@ UndoButton=Button(label="Undo",button_type="warning")
 SaveButton=Button(label="Save",button_type="success")
 LoadButton=Button(label="Load",button_type="success")
 
-mag_response = figure(title="magnitude response ",plot_width=400, plot_height=225)
+w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
+z = np.exp(1j*w)
+f = np.linspace(0, 180, 200)         # for ploting H(w)
+H = np.polyval(zeros_coef, z) / np.polyval(poles_coef, z) 
+phase =  np.unwrap(np.angle(H))
+mag_response = figure(title="magnitude response ",plot_width=400, plot_height=300)
 mag_response.xaxis.axis_label ="Frequency [Hz]"
 mag_response.yaxis.axis_label="Amplitude"
-
-phase_response = figure(title="phase response " , plot_width=400, plot_height=225)
+mag_response.line(f, abs(H), line_width=2)
+phase_response = figure(title="phase response " , plot_width=400, plot_height=300)
 phase_response.xaxis.axis_label ="Frequency [Hz]"
 phase_response.yaxis.axis_label="Phase"
+phase_response.line(f, phase, line_width=2)
 
-fig = figure(title="Z Plane",x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),plot_width=500, plot_height=500)  # sets size and makes it square
+fig = figure(title="Z Plane",x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),plot_width=450, plot_height=450)  # sets size and makes it square
 fig.xaxis.axis_label ="Real"
 fig.yaxis.axis_label="Imaginary"
 ax=fig.axis
@@ -56,6 +64,28 @@ vline = Span(location=0, dimension='height', line_color='red', line_width=3)
 hline = Span(location=0, dimension='width', line_color='red', line_width=3)
 
 fig.renderers.extend([vline, hline])
+
+all_pass = figure(title="Z Plane",x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),plot_width=300, plot_height=300)  # sets size and makes it square
+all_pass.xaxis.axis_label ="Real"
+all_pass.yaxis.axis_label="Imaginary"
+ax=all_pass.axis
+
+theta = np.linspace(-np.pi, np.pi, 201)
+all_pass.line(np.sin(theta), np.cos(theta), color = 'gray', line_width=3)
+
+vline = Span(location=0, dimension='height', line_color='red', line_width=3)
+# Horizontal line
+hline = Span(location=0, dimension='width', line_color='red', line_width=3)
+
+all_pass.renderers.extend([vline, hline])
+
+# real_slider = Slider(start=-1, end=1, value=0, step=.01, title="Real")
+# img_slider = Slider(start=-1, end=1, value=0, step=.01, title="Imaginary")
+# def batata(val):
+#     print(val)
+#     print(real_slider.value)
+# real_slider.on_change('value', batata)
+#img_slider.on_change('value', callback1, callback2, ..., callback_n)
 
 
 col = ['red' ,'blue']
@@ -116,23 +146,24 @@ def Draw_transfer_function():
 
     mag_response.renderers=[]
     phase_response.renderers=[]
+    zero_coef = zeros_coef
+    pole_coef = poles_coef
+    if type(zeros_coef) == float:
+        zero_coef = [zeros_coef]
+
+    if type(poles_coef) == float:
+        pole_coef = [poles_coef]
+    
+
+    all_zeros = np.concatenate((np.array(zero_coef) , np.array(zero_filter_coef)))
+    all_poles = np.concatenate((np.array(pole_coef) , np.array(pole_filter_coef)))
+
     w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
     z = np.exp(1j*w)
     f = np.linspace(0, 180, 200)         # for ploting H(w)
-    print("draw" ,type(zeros_coef),type(poles_coef))
-    if type(zeros_coef) == float and type(poles_coef) == np.ndarray:
-        print("only poles")
-        H = 1 / np.polyval(poles_coef, z) 
-    elif type(poles_coef) == float and type(zeros_coef) == np.ndarray :
-        print("only zeros")
-        H = np.polyval(zeros_coef, z)  
-    else:
-        print("both")
-        H = np.polyval(zeros_coef, z) / np.polyval(poles_coef, z) 
-
-
+    H = np.polyval(all_zeros, z) / np.polyval(all_poles, z) 
     phase =  np.unwrap(np.angle(H))
-    #print(H)
+    
     mag_response.line(f, abs(H), line_width=2)
     phase_response.line(f, phase, line_width=2)
 
@@ -160,6 +191,22 @@ def Set_Coefs():
 fig.on_event(Tap, Set_Coefs)
 fig.on_event(MouseLeave, Set_Coefs)
 
+def Add_All_pass_filter():
+    x= 0.5
+    y= 0.5
+    pole_pos = x+1j*y
+    pole_filter_coef.append(pole_pos)
+    angle = math.atan(y/x)
+    zero_x =abs(pole_pos)*np.cos(angle)
+    zero_y = abs(pole_pos)*np.sin(angle)
+    zero_filter_coef.append(zero_x+1j*zero_y)
+    Plot_Filter_points()
+
+def Plot_Filter_points():
+
+    all_pass.circle(x=[1, 2], y=[1, 2],color=['blue','red'], size=20)
+
+    
 
 
 # trans = plt.figure()
@@ -171,12 +218,14 @@ fig.on_event(MouseLeave, Set_Coefs)
 # plt.plot(f,phase)
 
 #fig.grid()
-x=column(ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton)
-
-x2 = column(fig)
-x3 = column(mag_response,phase_response)
+x=column(fig , ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton)
+#x=column(ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton , real_slider ,img_slider)
+x2 = column( mag_response,phase_response)
+x3 = column( all_pass)
+x4 =column()
 z=row(x , x2 , x3)
-
+# y=column(real_slider , img_slider)
+# z2=row(y)
 curdoc().add_root(row(z))
 
 
