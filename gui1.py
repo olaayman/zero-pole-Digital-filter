@@ -2,6 +2,7 @@ from bokeh.core.enums import ButtonType, SizingMode
 from bokeh.core.property.numeric import Size
 from bokeh.io import show
 from bokeh.models import CustomJS, RadioGroup,Button,Span
+from bokeh.models import DataTable, TableColumn, PointDrawTool, ColumnDataSource
 from bokeh.models.annotations import Label
 from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column
@@ -11,13 +12,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-Choosen="Zeros"
+Choosen="red"
 LABELS = ["Zeros", "Poles"]
 ZeroPoleChoose = RadioGroup(labels=LABELS, active=0)
 ZeroPoleChoose.js_on_click(CustomJS(code="""
     console.log('ZeroPoleChoose: active=' + this.active, this.toString())
 """))
+ZeroPoleChoose.on_change('active', lambda attr, old, new: update())
+def update():
+    if ZeroPoleChoose.active==0:
+        Choosen=="red"
+    if ZeroPoleChoose.active==1:
+        Choosen=="blue"
 ResetButton=Button(label="Reset",button_type="danger")
+
 UndoButton=Button(label="Undo",button_type="warning")
 SaveButton=Button(label="Save",button_type="success")
 LoadButton=Button(label="Load",button_type="success")
@@ -43,6 +51,22 @@ fig.renderers.extend([vline, hline])
 #ax.axvline(x=0, color='gray', linewidth=1)
 #r = fig.circle(0,0,radius=1,fill_color=None,line_color='OliveDrab')
 #plt.title("Z Plane")
+Zeros = ColumnDataSource({
+    'x': [], 'y': [], 'color': []
+})
+Poles = ColumnDataSource({
+    'x': [], 'y': [], 'color': []
+})
+
+ZerosRenderer = fig.scatter(x='x', y='y', source=Zeros, color='color', size=10)
+PolesRenderer = fig.scatter(x='x', y='y', source=Poles, color='color', size=10)
+
+
+
+draw_tool = PointDrawTool(renderers=[ZerosRenderer,PolesRenderer], empty_value=Choosen)
+fig.add_tools(draw_tool)
+fig.toolbar.active_tap = draw_tool
+
 
 #fig.grid()
 x=column(ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton)
@@ -61,4 +85,4 @@ z=row(x , x2)
 # # r = p.text(x=[], y=[], text=[], text_color=[], text_font_size="26px",
 # #            text_baseline="middle", text_align="center")
 # x=column(ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton)
-show(z)
+curdoc().add_root(row(z))
