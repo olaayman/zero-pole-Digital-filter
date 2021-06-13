@@ -22,6 +22,10 @@ zeros_coef = [1]
 poles_coef = [1]
 zero_filter_coef =[]
 pole_filter_coef =[]
+zero_filter_x =[]
+zero_filter_y =[]
+pole_filter_x =[]
+pole_filter_y= []
 
 LABELS = ["Zeros", "Poles"]
 ZeroPoleChoose = RadioGroup(labels=LABELS, active=0)
@@ -192,19 +196,31 @@ fig.on_event(Tap, Set_Coefs)
 fig.on_event(MouseLeave, Set_Coefs)
 
 def Add_All_pass_filter():
-    x= 0.5
-    y= 0.5
+    x= real_slider.value
+    y= img_slider.value
+    pole_filter_x.append(x)
+    pole_filter_y.append(y)
     pole_pos = x+1j*y
     pole_filter_coef.append(pole_pos)
     angle = math.atan(y/x)
     zero_x =abs(pole_pos)*np.cos(angle)
     zero_y = abs(pole_pos)*np.sin(angle)
+    zero_filter_x.append(zero_x)
+    zero_filter_y.append(zero_y)
     zero_filter_coef.append(zero_x+1j*zero_y)
     Plot_Filter_points()
 
-def Plot_Filter_points():
 
-    all_pass.circle(x=[1, 2], y=[1, 2],color=['blue','red'], size=20)
+
+def Plot_Filter_points():
+    pole_x =real_slider.value
+    pole_y =img_slider.value
+    angle = math.atan(pole_y/pole_x)
+    zero_x =abs(pole_x+1j*pole_y)*np.cos(angle)
+    zero_y = abs(pole_x+1j*pole_y)*np.sin(angle)
+    X=[pole_x,zero_x]
+    Y=[pole_y,zero_y]
+    all_pass.circle(x=X, y=Y,color=['blue','red'], size=20)
 
     
 
