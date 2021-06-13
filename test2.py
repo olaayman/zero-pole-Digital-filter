@@ -7,21 +7,26 @@ b = [1,-1]
 a = [0,0]  #the coef of the equation poles
 b = [1, -1j]
 b = [1, -.707-.707j] #the coef of the equation zeros
-poles1 = [-4.440 + 4.440j, -4.440 - 4.440j, -1.083 + 0.0j ,0.5,-0.5 -0.9 , 0.9]
-zeros1 = [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j , 2, -2, -1/0.9 , 1/0.9]
-zeros1 = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
-poles1 = [1.        +0.j        , 0.38223938-0.24421252j]
+poles1 = [-4.440 + 4.440j, -4.440 - 4.440j, -1.083 + 0.0j ,0.5,0.9]
+zeros1 = [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j , 2,1/0.9]
+#zeros1 = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
+#poles1 = [1.        +0.j        , 0.38223938-0.24421252j]
+
 #poles1 = [-4.440 + 4.440j, -4.440 - 4.440j, -1.083 + 0.0j ]
 #zeros1 = [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j ]
-#zeros1 = [-1/0.5]
-#poles1 = [-0.5]
+#zeros1 = [-1/0.5+0j]
+#poles1 = [-0.5+0j]
 poles = np.roots(a)
 zeros = np.roots(b)
 
 coef_zeros = np.poly(zeros1) #to get the coefs from the roots(x,y location on the z plane)
 coef_poles = np.poly(poles1) #to get the coefs from the roots(x,y location on the z plane)
-coef_zeros = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
-coef_poles = [1.        +0.j        , 0.38223938-0.24421252j]
+#coef_zeros = [ 1.        +0.j     ,    -1.01930502+0.10436433j  ,0.29274498-0.21488575j] 
+#coef_poles = [1.        +0.j        , 0.38223938-0.24421252j]
+#coef_zeros =[ 1.        , -1.96078431] 
+#coef_poles=[ 1.        +0.j     ,    -0.50308176-0.90489297j, -0.0035283 +0.46149541j]
+#coef_zeros =[1.0]
+#coef_poles= [1.        +0.j   ,      0.00691824-0.90489297j]
 print(coef_zeros,coef_poles)
 print("The poles are:  ", poles)
 print("The zeros are:  ", zeros)

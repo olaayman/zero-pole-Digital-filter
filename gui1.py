@@ -22,8 +22,14 @@ Checkboxs=[]
 #Choosen="red"
 zeros_coef = [1]
 poles_coef = [1]
-zero_filter_coef =[]
-pole_filter_coef =[]
+# zero_filter_coef =[]
+# pole_filter_coef =[]
+zero_filter_pos =[]
+pole_filter_pos =[]
+zero_filter_x =[]
+zero_filter_y =[]
+pole_filter_x =[]
+pole_filter_y= []
 
 Filters=CheckboxGroup(labels=Checkboxs)
 Filters.js_on_click(CustomJS(code="""
@@ -53,6 +59,10 @@ phase_response = figure(title="phase response " , plot_width=400, plot_height=30
 phase_response.xaxis.axis_label ="Frequency [Hz]"
 phase_response.yaxis.axis_label="Phase"
 phase_response.line(f, phase, line_width=2)
+filter_response = figure(title="phase response " , plot_width=300, plot_height=300)
+filter_response.xaxis.axis_label ="Frequency [Hz]"
+filter_response.yaxis.axis_label="Phase"
+#filter_response.line(f, phase, line_width=2)
 
 
 
@@ -76,7 +86,7 @@ hline = Span(location=0, dimension='width', line_color='red', line_width=3)
 fig.renderers.extend([vline, hline])
 
 ###raz3 btngana
-all_pass = figure(title="Z Plane",x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),plot_width=300, plot_height=300)  # sets size and makes it square
+all_pass = figure(title="Z Plane",x_range=(-3, 3), y_range=(-3, 3),plot_width=400, plot_height=400)  # sets size and makes it square
 all_pass.xaxis.axis_label ="Real"
 all_pass.yaxis.axis_label="Imaginary"
 ax=all_pass.axis
@@ -133,19 +143,21 @@ def Draw_transfer_function():
     zero_coef = zeros_coef
     pole_coef = poles_coef
     if type(zeros_coef) == float:
+        print("z float")
         zero_coef = [zeros_coef]
 
     if type(poles_coef) == float:
+        print("p float")
         pole_coef = [poles_coef]
     
 
-    all_zeros = np.concatenate((np.array(zero_coef) , np.array(zero_filter_coef)))
-    all_poles = np.concatenate((np.array(pole_coef) , np.array(pole_filter_coef)))
+    # all_zeros = np.concatenate((np.array(zero_coef) , np.array(zero_filter_coef)))
+    # all_poles = np.concatenate((np.array(pole_coef) , np.array(pole_filter_coef)))
 
     w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
     z = np.exp(1j*w)
     f = np.linspace(0, 180, 200)         # for ploting H(w)
-    H = np.polyval(all_zeros, z) / np.polyval(all_poles, z) 
+    H = np.polyval(zero_coef, z) / np.polyval(pole_coef, z) 
     phase =  np.unwrap(np.angle(H))
     
     mag_response.line(f, abs(H), line_width=2)
@@ -165,9 +177,9 @@ def Set_Coefs():
         poles_pos.append(Poles.data['x'][i]+1j*Poles.data['y'][i])
 
     
-    zeros_coef = np.poly(zeros_pos)
-    poles_coef = np.poly(poles_pos)
-    print(zeros_coef ,poles_coef)
+    zeros_coef = np.poly(zeros_pos+zero_filter_pos)
+    poles_coef = np.poly(poles_pos+pole_filter_pos)
+    print("coefs",zeros_coef ,poles_coef)
     Draw_transfer_function()
 
 
@@ -176,20 +188,64 @@ fig.on_event(Tap, Set_Coefs)
 fig.on_event(MouseLeave, Set_Coefs)
 
 def Add_All_pass_filter():
-    x= 0.5
-    y= 0.5
+    x= real_slider.value
+    y= img_slider.value
+    pole_filter_x.append(x)
+    pole_filter_y.append(y)
     pole_pos = x+1j*y
-    pole_filter_coef.append(pole_pos)
+    pole_filter_pos.append(pole_pos)
     angle = math.atan(y/x)
-    zero_x =abs(pole_pos)*np.cos(angle)
-    zero_y = abs(pole_pos)*np.sin(angle)
-    zero_filter_coef.append(zero_x+1j*zero_y)
-    Plot_Filter_points()
+    zero_x =(1/abs(pole_pos))*np.cos(angle)
+    zero_y = (1/abs(pole_pos))*np.sin(angle)
+    zero_filter_x.append(zero_x)
+    zero_filter_y.append(zero_y)
+    zero_filter_pos.append(zero_x+1j*zero_y)
+    Set_Coefs()
 
 def Plot_Filter_points():
+    pole_x =real_slider.value
+    pole_y =img_slider.value
+    all_pass.renderers = []
+    angle = math.atan(pole_y/pole_x)
+    zero_x =(1/abs(pole_x+1j*pole_y))*np.cos(angle)
+    zero_y =(1/ abs(pole_x+1j*pole_y))*np.sin(angle)
+    X=[pole_x,zero_x]
+    Y=[pole_y,zero_y]
+    all_pass.circle(x=X, y=Y,color=['blue','red'], size=15)
+    Plot_Filter_response(pole_x+1j*pole_y,zero_x+1j*zero_y)
 
-    all_pass.circle(x=[1, 2], y=[1, 2],color=['blue','red'], size=20)
 
+def Plot_Filter_response(p_pos,z_pos):
+    zero_filter_coef = np.poly([z_pos])
+    pole_filter_coef = np.poly([p_pos])
+    plt.plot(zero_filter_coef,pole_filter_coef)
+    filter_response.renderers=[]
+    theta = np.linspace(-np.pi, np.pi, 201)
+    all_pass.line(np.sin(theta), np.cos(theta), color = 'gray', line_width=3)
+
+    vline = Span(location=0, dimension='height', line_color='red', line_width=3)
+    # Horizontal line
+    hline = Span(location=0, dimension='width', line_color='red', line_width=3)
+
+    all_pass.renderers.extend([vline, hline])
+    zero_coef = zero_filter_coef
+    pole_coef = pole_filter_coef
+    if type(zero_filter_coef) == float:
+        print("z float")
+        zero_coef = [zero_filter_coef]
+
+    if type(pole_filter_coef) == float:
+        print("p float")
+        pole_coef = [pole_filter_coef]
+    w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
+    z = np.exp(1j*w)
+    f = np.linspace(0, 180, 200) 
+    mag = np.polyval(zero_filter_coef, z) / np.polyval(pole_filter_coef, z) 
+    phase =  np.unwrap(np.angle(mag))
+    #print(phase)
+    filter_response.line(f, phase, line_width=2)
+
+    
 
 
 
@@ -220,7 +276,11 @@ img_slider = Slider(start=-1, end=1, value=0, step=.01, title="Imaginary")
 #batata labsa tar7a 7lwa w jeba 7lwa
 def batata(attrname, old, new):
     print(real_slider.value)
+    Plot_Filter_points()
+    #Plot_Filter_response()
+
 real_slider.on_change('value', batata)
+img_slider.on_change('value', batata)
 
 
 ####Don't touch 
@@ -237,6 +297,7 @@ def AddFilterFunc(event):
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
+    Add_All_pass_filter()
     UpdateGUI()
 AddFilter.on_click(AddFilterFunc)
 
@@ -250,7 +311,8 @@ def UpdateGUI():
     x4=column(all_pass)
     z2=row(x3,x4)
     x5 = column( mag_response,phase_response)
-    z3=row(column(z,z2),x5)
+    x6 =column(filter_response)
+    z3=row(column(z,z2),x5,x6)
     curdoc().add_root(row(z3))
 UpdateGUI()
 
