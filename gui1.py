@@ -245,8 +245,27 @@ def Plot_Filter_response(p_pos,z_pos):
     #print(phase)
     filter_response.line(f, phase, line_width=2)
 
-    
-
+def activateFilters():
+    global zero_filter_pos ,pole_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
+    zero_filter_pos1 =[]
+    pole_filter_pos1 =[]
+    zero_filter_x1 =[]
+    zero_filter_y1 =[]
+    pole_filter_x1 =[]
+    pole_filter_y1= []
+    for active in Filters.active:
+        zero_filter_pos1.append(zero_filter_pos[active])
+        pole_filter_pos1.append(pole_filter_pos[active])
+        zero_filter_x1.append(zero_filter_x[active])
+        zero_filter_y1.append(zero_filter_y[active])
+        pole_filter_x1.append(pole_filter_x[active])
+        pole_filter_y1.append(pole_filter_y[active])
+    zero_filter_pos= zero_filter_pos1
+    pole_filter_pos= pole_filter_pos1 
+    zero_filter_x = zero_filter_x1 
+    zero_filter_y = zero_filter_y1 
+    pole_filter_x = pole_filter_x1 
+    pole_filter_y = pole_filter_y1
 
 
 
@@ -293,14 +312,15 @@ def AddFilterFunc(event):
     text="Filter"+str(len(Checkboxs)+1)
     Checkboxs.append(text)
     #fil.append(len(Checkboxs)-1)
-    Filters=CheckboxGroup(labels=Checkboxs)
+    #Filters=CheckboxGroup(labels=Checkboxs)
+    Filters=CheckboxGroup(labels=Checkboxs,active=[len(Checkboxs)-1])
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
     Add_All_pass_filter()
     UpdateGUI()
 AddFilter.on_click(AddFilterFunc)
-
+Filters.on_click(activateFilters)
 ##### ha2tlk ya btngana
 def UpdateGUI():
     curdoc().clear()
