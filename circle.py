@@ -27,11 +27,15 @@ poles_coef = [1]
 # pole_filter_coef =[]
 zero_filter_pos =[]
 pole_filter_pos =[]
+zero_filter_pos_conj =[]
+pole_filter_pos_conj =[]
 zero_filter_x =[]
 zero_filter_y =[]
 pole_filter_x =[]
 pole_filter_y= []
 conj = False
+pole_filter_pos_active =[]
+zero_filter_pos_active = []
 Filters=CheckboxGroup(labels=Checkboxs)
 Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
@@ -182,6 +186,7 @@ def Draw_transfer_function():
     H = np.polyval(zero_coef, z) / np.polyval(pole_coef, z) 
     phase =  np.unwrap(np.angle(H))
     
+    print(min(abs(H)), max(abs(H)))
     mag_response.line(f, abs(H), line_width=2)
     mag_response.y_range=Range1d(min(abs(H)), max(abs(H)))
     mag_response.x_range=Range1d(min(f), max(f))
@@ -189,6 +194,7 @@ def Draw_transfer_function():
     phase_response.line(f, phase, line_width=2)
     phase_response.y_range=Range1d(min(phase), max(phase))
     phase_response.x_range=Range1d(min(f), max(f))
+    print("after draw")
 
 
 
@@ -217,9 +223,9 @@ def Set_Coefs():
             Poles_conj.data['y']=-1*np.array(Poles.data['y'])
             poles_pos_conj.append(Poles.data['x'][i]-1j*Poles.data['y'][i])
     #print(poles_pos_conj)
-
-    poles_coef = np.poly(poles_pos+pole_filter_pos+poles_pos_conj)
-    zeros_coef = np.poly(zeros_pos+zero_filter_pos+zeros_pos_conj)
+    print("active zero in set coef",zero_filter_pos_active)
+    poles_coef = np.poly(poles_pos+pole_filter_pos_active+poles_pos_conj)
+    zeros_coef = np.poly(zeros_pos+zero_filter_pos_active+zeros_pos_conj)
     #if conj:
         # data_pole =np.array(Poles.data['y'])
         # data_zero = np.array(Zeros.data['y'])
@@ -254,27 +260,29 @@ def Add_All_pass_filter():
     zero_filter_y.append(zero_y)
     zero_filter_pos.append(zero_x+1j*zero_y)
     if conj:
-        pole_filter_pos.append(x-1j*y)
-        zero_filter_pos.append(zero_x-1j*zero_y)
+        pole_filter_pos_conj.append(x-1j*y)
+        zero_filter_pos_conj.append(zero_x-1j*zero_y)
+    print(zero_filter_pos,zero_filter_pos_conj)
     Set_Coefs()
 
 def Plot_Filter_points():
     pole_x =real_slider.value
     pole_y =img_slider.value
     all_pass.renderers = []
-    angle = math.atan(pole_y/pole_x)
-    zero_x =(1/abs(pole_x+1j*pole_y))*np.cos(angle)
-    zero_y =(1/ abs(pole_x+1j*pole_y))*np.sin(angle)
-    if conj:
-        X=[pole_x,pole_x,zero_x,zero_x]
-        Y=[pole_y,-pole_y,zero_y,-zero_y]
-        all_pass.circle(x=X, y=Y,color=['blue','blue','red','red'], size=10)
-        Plot_Filter_response([pole_x+1j*pole_y,pole_x-1j*pole_y],[zero_x+1j*zero_y,zero_x+1j*zero_y])
-    else:
-        X=[pole_x,zero_x]
-        Y=[pole_y,zero_y]
-        all_pass.circle(x=X, y=Y,color=['blue','red'], size=10)
-        Plot_Filter_response(pole_x+1j*pole_y,zero_x+1j*zero_y)
+    if pole_x:
+        angle = math.atan(pole_y/pole_x)
+        zero_x =(1/abs(pole_x+1j*pole_y))*np.cos(angle)
+        zero_y =(1/ abs(pole_x+1j*pole_y))*np.sin(angle)
+        if conj:
+            X=[pole_x,pole_x,zero_x,zero_x]
+            Y=[pole_y,-pole_y,zero_y,-zero_y]
+            all_pass.circle(x=X, y=Y,color=['blue','blue','red','red'], size=10)
+            Plot_Filter_response([pole_x+1j*pole_y,pole_x-1j*pole_y],[zero_x+1j*zero_y,zero_x+1j*zero_y])
+        else:
+            X=[pole_x,zero_x]
+            Y=[pole_y,zero_y]
+            all_pass.circle(x=X, y=Y,color=['blue','red'], size=10)
+            Plot_Filter_response(pole_x+1j*pole_y,zero_x+1j*zero_y)
 
 
 def Plot_Filter_response(p_pos,z_pos):
@@ -416,6 +424,7 @@ img_slider.on_change('value', batata)
 AddFilter=Button(label="Add Filter",button_type="success")
 def AddFilterFunc(event):
     #print("1")
+    Add_All_pass_filter()
     curdoc().clear()
     global Checkboxs
     global Filters
@@ -425,8 +434,8 @@ def AddFilterFunc(event):
         activ.clear()
         activ=Filters.active
         activ.append(Count)
-        print(activ)
-        print(Filters.active)
+        #print(activ)
+        #print(Filters.active)
     text="Filter"+str(len(Checkboxs)+1)
     Checkboxs.append(text)
     #fil.append(len(Checkboxs)-1)
@@ -437,35 +446,46 @@ def AddFilterFunc(event):
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
-    Add_All_pass_filter()
     UpdateGUI()
 AddFilter.on_click(AddFilterFunc)
 def ActivateFiltters():
     print('Batata')
-    global zero_filter_pos ,pole_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
-    zero_filter_pos1 =[]
-    pole_filter_pos1 =[]
-    zero_filter_x1 =[]
-    zero_filter_y1 =[]
-    pole_filter_x1 =[]
-    pole_filter_y1= []
+    global zero_filter_pos_active ,pole_filter_pos_active,pole_filter_pos,zero_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
+    # zero_filter_pos1 =[]
+    # pole_filter_pos1 =[]
+    # zero_filter_x1 =[]
+    # zero_filter_y1 =[]
+    # pole_filter_x1 =[]
+    # pole_filter_y1= []
     list=Filters.active
+    print(zero_filter_pos)
+    print(zero_filter_pos_conj)
     print(list)
     print(Filters.active)
-    for active in range(len(list)):
-        print('1')
-        zero_filter_pos1.append(zero_filter_pos[active])
-        pole_filter_pos1.append(pole_filter_pos[active])
-        zero_filter_x1.append(zero_filter_x[active])
-        zero_filter_y1.append(zero_filter_y[active])
-        pole_filter_x1.append(pole_filter_x[active])
-        pole_filter_y1.append(pole_filter_y[active])
-    zero_filter_pos= zero_filter_pos1
-    pole_filter_pos= pole_filter_pos1 
-    zero_filter_x = zero_filter_x1 
-    zero_filter_y = zero_filter_y1 
-    pole_filter_x = pole_filter_x1 
-    pole_filter_y = pole_filter_y1
+    print('any')
+    print('coco')
+    if conj:
+        zero_filter_pos_active = [zero_filter_pos[i] for i in list] + [zero_filter_pos_conj[i] for i in list]
+        pole_filter_pos_active = [pole_filter_pos[i] for i in list] + [pole_filter_pos_conj[i] for i in list]
+    else:
+        zero_filter_pos_active = [zero_filter_pos[i] for i in list] 
+        pole_filter_pos_active = [pole_filter_pos[i] for i in list] 
+    print("active in activate",zero_filter_pos_active ,pole_filter_pos_active)
+    #Set_Coefs()
+    # for active in range(len(list)):
+    #     print('1')
+    #     zero_filter_pos1.append(zero_filter_pos[active])
+    #     pole_filter_pos1.append(pole_filter_pos[active])
+    #     zero_filter_x1.append(zero_filter_x[active])
+    #     zero_filter_y1.append(zero_filter_y[active])
+    #     pole_filter_x1.append(pole_filter_x[active])
+    #     pole_filter_y1.append(pole_filter_y[active])
+    # zero_filter_pos= zero_filter_pos1
+    # pole_filter_pos= pole_filter_pos1 
+    # zero_filter_x = zero_filter_x1 
+    # zero_filter_y = zero_filter_y1 
+    # pole_filter_x = pole_filter_x1 
+    # pole_filter_y = pole_filter_y1
 #Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
 ##### ha2tlk ya btngana
 def UpdateGUI():
