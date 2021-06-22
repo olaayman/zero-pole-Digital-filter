@@ -37,4 +37,6 @@ x = 3
 xx = [x]
 y = np.array([3,4,5])
 z = np.concatenate((xx,y))
-print(z)
+ola = [1,2,3,4,5,6]
+coco = ola[[1,2,4,5]]
+print(coco)

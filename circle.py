@@ -2,7 +2,7 @@ from logging import Filter
 from bokeh.core.enums import ButtonType, SizingMode
 from bokeh.core.property.numeric import Size
 from bokeh.io import show
-from bokeh.models import CustomJS, RadioGroup,Button,Span,Slider
+from bokeh.models import CustomJS, RadioGroup,Button,Span,Slider ,Range1d
 from bokeh.models import DataTable, TableColumn, PointDrawTool, ColumnDataSource
 from bokeh.models.annotations import Label
 from bokeh.models.widgets.groups import CheckboxGroup
@@ -14,7 +14,6 @@ from bokeh.events import MouseMove, Tap ,MouseLeave
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-
 
 Choosen="red"
 Checkboxs=[]
@@ -182,7 +181,12 @@ def Draw_transfer_function():
     phase =  np.unwrap(np.angle(H))
     
     mag_response.line(f, abs(H), line_width=2)
+    mag_response.y_range=Range1d(min(abs(H)), max(abs(H)))
+    mag_response.x_range=Range1d(min(f), max(f))
+
     phase_response.line(f, phase, line_width=2)
+    phase_response.y_range=Range1d(min(phase), max(phase))
+    phase_response.x_range=Range1d(min(f), max(f))
 
     
     
@@ -290,6 +294,8 @@ def Plot_Filter_response(p_pos,z_pos):
     phase =  np.unwrap(np.angle(mag))
     #print(phase)
     filter_response.line(f, phase, line_width=2)
+    filter_response.y_range=Range1d(min(phase), max(phase))
+    filter_response.x_range=Range1d(min(f), max(f))
 
 # def Add_All_pass_filter():
 #     x= real_slider.value
