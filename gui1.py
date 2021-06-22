@@ -129,10 +129,10 @@ fig.toolbar.active_tap = draw_tool_2
 def update():
     if ZeroPoleChoose.active==0:
         Choosen=="red"
-        print("11")
+        #print("11")
     if ZeroPoleChoose.active==1:
         Choosen=="blue"
-        print("22")
+        #print("22")
 ZeroPoleChoose.on_change('active', lambda attr, old, new: update())
 ResetButton=Button(label="Reset",button_type="danger")
 
@@ -143,11 +143,11 @@ def Draw_transfer_function():
     zero_coef = zeros_coef
     pole_coef = poles_coef
     if type(zeros_coef) == float:
-        print("z float")
+        #print("z float")
         zero_coef = [zeros_coef]
 
     if type(poles_coef) == float:
-        print("p float")
+        #print("p float")
         pole_coef = [poles_coef]
     
 
@@ -179,7 +179,7 @@ def Set_Coefs():
     
     zeros_coef = np.poly(zeros_pos+zero_filter_pos)
     poles_coef = np.poly(poles_pos+pole_filter_pos)
-    print("coefs",zeros_coef ,poles_coef)
+    #print("coefs",zeros_coef ,poles_coef)
     Draw_transfer_function()
 
 
@@ -231,11 +231,11 @@ def Plot_Filter_response(p_pos,z_pos):
     zero_coef = zero_filter_coef
     pole_coef = pole_filter_coef
     if type(zero_filter_coef) == float:
-        print("z float")
+        #print("z float")
         zero_coef = [zero_filter_coef]
 
     if type(pole_filter_coef) == float:
-        print("p float")
+        #print("p float")
         pole_coef = [pole_filter_coef]
     w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
     z = np.exp(1j*w)
@@ -245,7 +245,63 @@ def Plot_Filter_response(p_pos,z_pos):
     #print(phase)
     filter_response.line(f, phase, line_width=2)
 
+
+
+def clearPoles(event):
+    global Poles
+    Poles.data = {k: [] for k in Poles.data}
+    #Poles = ColumnDataSource(dict(x=[],y=[]))
+ClearPoles.on_click(clearPoles)
+
+def clearZeros(event):
+    global Zeros
+    Zeros.data = {k: [] for k in Zeros.data}
+    #Zeros = ColumnDataSource(dict(x=[],y=[]))
+ClearZeros.on_click(clearZeros)
+def Reset(event):
+    global Poles
+    Poles.data = {k: [] for k in Poles.data}
+    global Zeros
+    Zeros.data = {k: [] for k in Zeros.data}
+    #Zeros = ColumnDataSource(dict(x=[],y=[]))
+ResetButton.on_click(Reset)
+
+real_slider = Slider(start=-1, end=1, value=0, step=.01, title="Real")
+img_slider = Slider(start=-1, end=1, value=0, step=.01, title="Imaginary")
+
+#batata labsa tar7a 7lwa w jeba 7lwa
+def batata(attrname, old, new):
+    #print(real_slider.value)
+    Plot_Filter_points()
+    #Plot_Filter_response()
+
+real_slider.on_change('value', batata)
+img_slider.on_change('value', batata)
+
+
+####Don't touch 
+AddFilter=Button(label="Add Filter",button_type="success")
+def AddFilterFunc(event):
+    #print("1")
+    global Checkboxs
+    global Filters
+    #fil=list(Filters.active())
+    curdoc().clear()
+    text="Filter"+str(len(Checkboxs)+1)
+    Checkboxs.append(text)
+    #fil.append(len(Checkboxs)-1)
+    #Filters=CheckboxGroup(labels=Checkboxs)
+    Filters=CheckboxGroup(labels=Checkboxs,active=[len(Checkboxs)-1])
+    Filters.js_on_click(CustomJS(code="""
+    console.log('checkbox_group: active=' + this.active, this.toString())
+    """))
+    Filters.on_change('active', lambda attr, old, new: activateFilters())
+    Add_All_pass_filter()
+    UpdateGUI()
+AddFilter.on_click(AddFilterFunc)
+
 def activateFilters():
+    print("111111111111111111111")
     global zero_filter_pos ,pole_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
     zero_filter_pos1 =[]
     pole_filter_pos1 =[]
@@ -266,61 +322,8 @@ def activateFilters():
     zero_filter_y = zero_filter_y1 
     pole_filter_x = pole_filter_x1 
     pole_filter_y = pole_filter_y1
-
-
-
-def clearPoles(event):
-    global Poles
-    Poles.data = {k: [] for k in Poles.data}
-    #Poles = ColumnDataSource(dict(x=[],y=[]))
-ClearPoles.on_click(clearPoles)
-
-def clearZeros(event):
-    global Zeros
-    Zeros.data = {k: [] for k in Zeros.data}
-    #Zeros = ColumnDataSource(dict(x=[],y=[]))
-ClearZeros.on_click(clearZeros)
-
-def Reset(event):
-    global Poles
-    Poles.data = {k: [] for k in Poles.data}
-    global Zeros
-    Zeros.data = {k: [] for k in Zeros.data}
-    #Zeros = ColumnDataSource(dict(x=[],y=[]))
-ResetButton.on_click(Reset)
-
-real_slider = Slider(start=-1, end=1, value=0, step=.01, title="Real")
-img_slider = Slider(start=-1, end=1, value=0, step=.01, title="Imaginary")
-
-#batata labsa tar7a 7lwa w jeba 7lwa
-def batata(attrname, old, new):
-    print(real_slider.value)
-    Plot_Filter_points()
-    #Plot_Filter_response()
-
-real_slider.on_change('value', batata)
-img_slider.on_change('value', batata)
-
-
-####Don't touch 
-AddFilter=Button(label="Add Filter",button_type="success")
-def AddFilterFunc(event):
-    print("1")
-    curdoc().clear()
-    global Checkboxs
-    global Filters
-    text="Filter"+str(len(Checkboxs)+1)
-    Checkboxs.append(text)
-    #fil.append(len(Checkboxs)-1)
-    #Filters=CheckboxGroup(labels=Checkboxs)
-    Filters=CheckboxGroup(labels=Checkboxs,active=[len(Checkboxs)-1])
-    Filters.js_on_click(CustomJS(code="""
-    console.log('checkbox_group: active=' + this.active, this.toString())
-    """))
-    Add_All_pass_filter()
-    UpdateGUI()
-AddFilter.on_click(AddFilterFunc)
-Filters.on_click(activateFilters)
+    Set_Coefs()
+Filters.on_change('active', lambda attr, old, new: activateFilters())
 ##### ha2tlk ya btngana
 def UpdateGUI():
     curdoc().clear()
