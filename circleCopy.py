@@ -1,10 +1,8 @@
-from itertools import count
 from logging import Filter
-from typing import List
 from bokeh.core.enums import ButtonType, SizingMode
 from bokeh.core.property.numeric import Size
 from bokeh.io import show
-from bokeh.models import CustomJS, RadioGroup,Button,Span,Slider ,Range1d , filters
+from bokeh.models import CustomJS, RadioGroup,Button,Span,Slider ,Range1d
 from bokeh.models import DataTable, TableColumn, PointDrawTool, ColumnDataSource
 from bokeh.models.annotations import Label
 from bokeh.models.widgets.groups import CheckboxGroup
@@ -19,7 +17,7 @@ import math
 
 Choosen="red"
 Checkboxs=[]
-Count=0
+
 #Choosen="red"
 zeros_coef = [1]
 poles_coef = [1]
@@ -440,20 +438,11 @@ def AddFilterFunc(event):
     curdoc().clear()
     global Checkboxs
     global Filters
-    global Count
-    activ=[0]
-    if Count>0:
-        activ.clear()
-        activ=Filters.active
-        activ.append(Count)
-        print(activ)
-        print(Filters.active)
     text="Filter"+str(len(Checkboxs)+1)
     Checkboxs.append(text)
     #fil.append(len(Checkboxs)-1)
     #Filters=CheckboxGroup(labels=Checkboxs)
-    Filters=CheckboxGroup(labels=Checkboxs,active=activ)
-    Count=Count+1
+    Filters=CheckboxGroup(labels=Checkboxs,active=[len(Checkboxs)-1])
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
