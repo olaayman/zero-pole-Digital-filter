@@ -380,27 +380,35 @@ def set_conj():
     else:
         conj = False
 
+    Zeros_conj.data = {k: [] for k in Zeros_conj.data}
+    Poles_conj.data = {k: [] for k in Poles_conj.data}
+    Set_Coefs()
+
 conj_button=Button(label="enable /disable conjugate",button_type="success")
 conj_button.on_click(set_conj)
 
 def clearPoles(event):
-    global Poles
+    global Poles , Poles_conj
     Poles.data = {k: [] for k in Poles.data}
+    Poles_conj.data = {k: [] for k in Poles_conj.data}
     #Poles = ColumnDataSource(dict(x=[],y=[]))
 ClearPoles.on_click(clearPoles)
 
 def clearZeros(event):
-    global Zeros
+    global Zeros , Zeros_conj
     Zeros.data = {k: [] for k in Zeros.data}
+    Zeros_conj.data = {k: [] for k in Zeros_conj.data}
     #Zeros = ColumnDataSource(dict(x=[],y=[]))
 
 ClearZeros.on_click(clearZeros)
 
 def Reset(event):
-    global Poles
+    global Poles , Poles_conj
     Poles.data = {k: [] for k in Poles.data}
-    global Zeros
+    Poles_conj.data = {k: [] for k in Poles_conj.data}
+    global Zeros , Zeros_conj
     Zeros.data = {k: [] for k in Zeros.data}
+    Zeros_conj.data = {k: [] for k in Zeros_conj.data}
     #Zeros = ColumnDataSource(dict(x=[],y=[]))
 ResetButton.on_click(Reset)
 
