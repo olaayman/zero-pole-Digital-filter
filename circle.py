@@ -190,8 +190,8 @@ def Draw_transfer_function():
     phase_response.y_range=Range1d(min(phase), max(phase))
     phase_response.x_range=Range1d(min(f), max(f))
 
-    
-    
+
+
 
 def Set_Coefs():
     global zeros_coef , poles_coef
@@ -216,7 +216,7 @@ def Set_Coefs():
             Poles_conj.data['x']=Poles.data['x']
             Poles_conj.data['y']=-1*np.array(Poles.data['y'])
             poles_pos_conj.append(Poles.data['x'][i]-1j*Poles.data['y'][i])
-    print(poles_pos_conj)
+    #print(poles_pos_conj)
 
     poles_coef = np.poly(poles_pos+pole_filter_pos+poles_pos_conj)
     zeros_coef = np.poly(zeros_pos+zero_filter_pos+zeros_pos_conj)
@@ -359,27 +359,6 @@ def Plot_Filter_response(p_pos,z_pos):
 #     filter_response.line(f, phase, line_width=2)
 
 
-def activateFilters():
-    global zero_filter_pos ,pole_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
-    zero_filter_pos1 =[]
-    pole_filter_pos1 =[]
-    zero_filter_x1 =[]
-    zero_filter_y1 =[]
-    pole_filter_x1 =[]
-    pole_filter_y1= []
-    for active in Filters.active:
-        zero_filter_pos1.append(zero_filter_pos[active])
-        pole_filter_pos1.append(pole_filter_pos[active])
-        zero_filter_x1.append(zero_filter_x[active])
-        zero_filter_y1.append(zero_filter_y[active])
-        pole_filter_x1.append(pole_filter_x[active])
-        pole_filter_y1.append(pole_filter_y[active])
-    zero_filter_pos= zero_filter_pos1
-    pole_filter_pos= pole_filter_pos1 
-    zero_filter_x = zero_filter_x1 
-    zero_filter_y = zero_filter_y1 
-    pole_filter_x = pole_filter_x1 
-    pole_filter_y = pole_filter_y1
 
 def set_conj():
     global conj
@@ -453,6 +432,7 @@ def AddFilterFunc(event):
     #fil.append(len(Checkboxs)-1)
     #Filters=CheckboxGroup(labels=Checkboxs)
     Filters=CheckboxGroup(labels=Checkboxs,active=activ)
+    Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
     Count=Count+1
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
@@ -460,7 +440,33 @@ def AddFilterFunc(event):
     Add_All_pass_filter()
     UpdateGUI()
 AddFilter.on_click(AddFilterFunc)
-Filters.on_click(activateFilters)
+def ActivateFiltters():
+    print('Batata')
+    global zero_filter_pos ,pole_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
+    zero_filter_pos1 =[]
+    pole_filter_pos1 =[]
+    zero_filter_x1 =[]
+    zero_filter_y1 =[]
+    pole_filter_x1 =[]
+    pole_filter_y1= []
+    list=Filters.active
+    print(list)
+    print(Filters.active)
+    for active in range(len(list)):
+        print('1')
+        zero_filter_pos1.append(zero_filter_pos[active])
+        pole_filter_pos1.append(pole_filter_pos[active])
+        zero_filter_x1.append(zero_filter_x[active])
+        zero_filter_y1.append(zero_filter_y[active])
+        pole_filter_x1.append(pole_filter_x[active])
+        pole_filter_y1.append(pole_filter_y[active])
+    zero_filter_pos= zero_filter_pos1
+    pole_filter_pos= pole_filter_pos1 
+    zero_filter_x = zero_filter_x1 
+    zero_filter_y = zero_filter_y1 
+    pole_filter_x = pole_filter_x1 
+    pole_filter_y = pole_filter_y1
+#Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
 ##### ha2tlk ya btngana
 def UpdateGUI():
     curdoc().clear()
