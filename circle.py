@@ -74,6 +74,9 @@ filter_response.yaxis.axis_label="Phase"
 
 def Draw_Circle_And_Axis(graph):
 
+    graph.xaxis.axis_label ="Real"
+    graph.yaxis.axis_label="Imaginary"
+    ax=graph.axis
     theta = np.linspace(-np.pi, np.pi, 201)
     graph.line(np.sin(theta), np.cos(theta), color = 'gray', line_width=3)
 
@@ -84,29 +87,11 @@ def Draw_Circle_And_Axis(graph):
     graph.renderers.extend([vline, hline])
 
 fig = figure(title="Z Plane",x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),plot_width=400, plot_height=400)  # sets size and makes it square
-fig.xaxis.axis_label ="Real"
-fig.yaxis.axis_label="Imaginary"
-ax=fig.axis
 Draw_Circle_And_Axis(fig)
-#fig.legend(loc='upper left')
-#ax = fig.axes()
-#plot unit circle
-#axis=fig.add_subplot(1,1,1)
 
 ###raz3 btngana
 all_pass = figure(title="Z Plane",x_range=(-3, 3), y_range=(-3, 3),plot_width=400, plot_height=400)  # sets size and makes it square
-all_pass.xaxis.axis_label ="Real"
-all_pass.yaxis.axis_label="Imaginary"
-ax=all_pass.axis
 Draw_Circle_And_Axis(all_pass)
-# theta = np.linspace(-np.pi, np.pi, 201)
-# all_pass.line(np.sin(theta), np.cos(theta), color = 'gray', line_width=3)
-
-# vline = Span(location=0, dimension='height', line_color='red', line_width=3)
-# # Horizontal line
-# hline = Span(location=0, dimension='width', line_color='red', line_width=3)
-
-# all_pass.renderers.extend([vline, hline])
 
 col = ['red' ,'blue']
 Zeros = ColumnDataSource(
@@ -186,7 +171,6 @@ def Draw_transfer_function():
     H = np.polyval(zero_coef, z) / np.polyval(pole_coef, z) 
     phase =  np.unwrap(np.angle(H))
     
-    print(min(abs(H)), max(abs(H)))
     mag_response.line(f, abs(H), line_width=2)
     mag_response.y_range=Range1d(min(abs(H)), max(abs(H)))
     mag_response.x_range=Range1d(min(f), max(f))
@@ -205,10 +189,15 @@ def Set_Coefs():
     poles_pos = []
     poles_pos_conj = []
     zeros_pos_conj = []
+    Zeros_conj.data['x']=[]
+    Zeros_conj.data['y']=[]
+    Poles_conj.data['x']=[]
+    Poles_conj.data['y']=[]
     #fig.renderers=[]
     #Draw_Circle_And_Axis(fig)
     #Draw_Zeros_And_Poles()
     #UpdateGUI()
+    
     for i in range(len(Zeros.data['x'])):
         zeros_pos.append(Zeros.data['x'][i]+1j*Zeros.data['y'][i])
         if conj:
@@ -222,8 +211,9 @@ def Set_Coefs():
             Poles_conj.data['x']=Poles.data['x']
             Poles_conj.data['y']=-1*np.array(Poles.data['y'])
             poles_pos_conj.append(Poles.data['x'][i]-1j*Poles.data['y'][i])
-    #print(poles_pos_conj)
-    print("active zero in set coef",zero_filter_pos_active)
+    #print("zero x y conj",len(Poles.data['x']),len(Poles.data['y']))
+    #print("active zero in set coef",zero_filter_pos_active)
+    print(Poles.data['x'],Poles_conj.data['x'],poles_pos_conj)
     poles_coef = np.poly(poles_pos+pole_filter_pos_active+poles_pos_conj)
     zeros_coef = np.poly(zeros_pos+zero_filter_pos_active+zeros_pos_conj)
     #if conj:
@@ -262,7 +252,7 @@ def Add_All_pass_filter():
     if conj:
         pole_filter_pos_conj.append(x-1j*y)
         zero_filter_pos_conj.append(zero_x-1j*zero_y)
-    print(zero_filter_pos,zero_filter_pos_conj)
+    print("in add filter , zero pos",zero_filter_pos,zero_filter_pos_conj)
     Set_Coefs()
 
 def Plot_Filter_points():
@@ -307,66 +297,6 @@ def Plot_Filter_response(p_pos,z_pos):
     filter_response.y_range=Range1d(min(phase), max(phase))
     filter_response.x_range=Range1d(min(f), max(f))
 
-# def Add_All_pass_filter():
-#     x= real_slider.value
-#     y= img_slider.value
-#     pole_filter_x.append(x)
-#     pole_filter_y.append(y)
-#     pole_pos = x+1j*y
-#     pole_filter_pos.append(pole_pos)
-#     angle = math.atan(y/x)
-#     zero_x =(1/abs(pole_pos))*np.cos(angle)
-#     zero_y = (1/abs(pole_pos))*np.sin(angle)
-#     zero_filter_x.append(zero_x)
-#     zero_filter_y.append(zero_y)
-#     zero_filter_pos.append(zero_x+1j*zero_y)
-#     Set_Coefs()
-
-# def Plot_Filter_points():
-#     pole_x =real_slider.value
-#     pole_y =img_slider.value
-#     all_pass.renderers = []
-#     angle = math.atan(pole_y/pole_x)
-#     zero_x =(1/abs(pole_x+1j*pole_y))*np.cos(angle)
-#     zero_y =(1/ abs(pole_x+1j*pole_y))*np.sin(angle)
-#     X=[pole_x,zero_x]
-#     Y=[pole_y,zero_y]
-#     all_pass.circle(x=X, y=Y,color=['blue','red'], size=15)
-#     Plot_Filter_response(pole_x+1j*pole_y,zero_x+1j*zero_y)
-
-
-# def Plot_Filter_response(p_pos,z_pos):
-#     zero_filter_coef = np.poly([z_pos])
-#     pole_filter_coef = np.poly([p_pos])
-#     plt.plot(zero_filter_coef,pole_filter_coef)
-#     filter_response.renderers=[]
-#     Draw_Circle_And_Axis(all_pass)
-#     # theta = np.linspace(-np.pi, np.pi, 201)
-#     # all_pass.line(np.sin(theta), np.cos(theta), color = 'gray', line_width=3)
-
-#     # vline = Span(location=0, dimension='height', line_color='red', line_width=3)
-#     # # Horizontal line
-#     # hline = Span(location=0, dimension='width', line_color='red', line_width=3)
-
-#     # all_pass.renderers.extend([vline, hline])
-#     zero_coef = zero_filter_coef
-#     pole_coef = pole_filter_coef
-#     if type(zero_filter_coef) == float:
-#         print("z float")
-#         zero_coef = [zero_filter_coef]
-
-#     if type(pole_filter_coef) == float:
-#         print("p float")
-#         pole_coef = [pole_filter_coef]
-#     w = np.linspace(0,np.pi, 200)    # for evauluating H(w)
-#     z = np.exp(1j*w)
-#     f = np.linspace(0, 180, 200) 
-#     mag = np.polyval(zero_filter_coef, z) / np.polyval(pole_filter_coef, z) 
-#     phase =  np.unwrap(np.angle(mag))
-#     #print(phase)
-#     filter_response.line(f, phase, line_width=2)
-
-
 
 def set_conj():
     global conj
@@ -378,6 +308,8 @@ def set_conj():
     Zeros_conj.data = {k: [] for k in Zeros_conj.data}
     Poles_conj.data = {k: [] for k in Poles_conj.data}
     Set_Coefs()
+    UpdateGUI()
+    #Draw_transfer_function()
 
 conj_button=Button(label="enable /disable conjugate",button_type="success")
 conj_button.on_click(set_conj)
@@ -446,46 +378,24 @@ def AddFilterFunc(event):
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
+    ActivateFiltters()
     UpdateGUI()
+    
 AddFilter.on_click(AddFilterFunc)
 def ActivateFiltters():
     print('Batata')
-    global zero_filter_pos_active ,pole_filter_pos_active,pole_filter_pos,zero_filter_pos ,zero_filter_x ,zero_filter_y ,pole_filter_x ,pole_filter_y    
-    # zero_filter_pos1 =[]
-    # pole_filter_pos1 =[]
-    # zero_filter_x1 =[]
-    # zero_filter_y1 =[]
-    # pole_filter_x1 =[]
-    # pole_filter_y1= []
+    global zero_filter_pos_active ,pole_filter_pos_active,pole_filter_pos,zero_filter_pos  
+    
     list=Filters.active
-    print(zero_filter_pos)
-    print(zero_filter_pos_conj)
-    print(list)
-    print(Filters.active)
-    print('any')
-    print('coco')
     if conj:
         zero_filter_pos_active = [zero_filter_pos[i] for i in list] + [zero_filter_pos_conj[i] for i in list]
         pole_filter_pos_active = [pole_filter_pos[i] for i in list] + [pole_filter_pos_conj[i] for i in list]
     else:
         zero_filter_pos_active = [zero_filter_pos[i] for i in list] 
         pole_filter_pos_active = [pole_filter_pos[i] for i in list] 
-    print("active in activate",zero_filter_pos_active ,pole_filter_pos_active)
-    #Set_Coefs()
-    # for active in range(len(list)):
-    #     print('1')
-    #     zero_filter_pos1.append(zero_filter_pos[active])
-    #     pole_filter_pos1.append(pole_filter_pos[active])
-    #     zero_filter_x1.append(zero_filter_x[active])
-    #     zero_filter_y1.append(zero_filter_y[active])
-    #     pole_filter_x1.append(pole_filter_x[active])
-    #     pole_filter_y1.append(pole_filter_y[active])
-    # zero_filter_pos= zero_filter_pos1
-    # pole_filter_pos= pole_filter_pos1 
-    # zero_filter_x = zero_filter_x1 
-    # zero_filter_y = zero_filter_y1 
-    # pole_filter_x = pole_filter_x1 
-    # pole_filter_y = pole_filter_y1
+    Set_Coefs()
+    UpdateGUI()
+    
 #Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
 ##### ha2tlk ya btngana
 def UpdateGUI():
@@ -503,16 +413,3 @@ def UpdateGUI():
 UpdateGUI()
 
 
-#fig.grid()
-#show(ZeroPoleChoose)
-# p = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5), toolbar_location=None)
-# p.border_fill_color = 'white'
-# p.background_fill_color = 'white'
-# p.outline_line_color = None
-# p.grid.grid_line_color = None
-
-# # add a text renderer to the plot (no data yet)
-# r = p.circle(0,0,radius=1,fill_color=None,line_color='OliveDrab')
-# # r = p.text(x=[], y=[], text=[], text_color=[], text_font_size="26px",
-# #            text_baseline="middle", text_align="center")
-# x=column(ZeroPoleChoose,ResetButton,UndoButton,SaveButton,LoadButton)
