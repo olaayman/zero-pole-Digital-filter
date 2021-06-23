@@ -417,6 +417,7 @@ AddFilter=Button(label="Add Filter",button_type="success")
 def AddFilterFunc(event):
     #print("1")
     curdoc().clear()
+    Add_All_pass_filter()
     global Checkboxs
     global Filters
     global Count
@@ -432,12 +433,11 @@ def AddFilterFunc(event):
     #fil.append(len(Checkboxs)-1)
     #Filters=CheckboxGroup(labels=Checkboxs)
     Filters=CheckboxGroup(labels=Checkboxs,active=activ)
-    Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
     Count=Count+1
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
-    Add_All_pass_filter()
+    Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
     UpdateGUI()
 AddFilter.on_click(AddFilterFunc)
 def ActivateFiltters():
