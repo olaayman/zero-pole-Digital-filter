@@ -346,6 +346,7 @@ def AddFilterFunc(event):
     Filters.js_on_click(CustomJS(code="""
     console.log('checkbox_group: active=' + this.active, this.toString())
     """))
+<<<<<<< HEAD:Filter.py
 <<<<<<< HEAD:circle.py
 <<<<<<< HEAD
     Filters.on_change('active', lambda attr, old, new: ActivateFiltters())
@@ -354,6 +355,9 @@ def AddFilterFunc(event):
 =======
     ActivateFiltters()
 >>>>>>> cde80da5ccdedd34081ac7c93134f430fa1f0f5e:Filter.py
+=======
+    ActivateFiltters()
+>>>>>>> 18943bd154242b0573a7339e7de37a0b1f2f4dc4:circle.py
     UpdateGUI()
     
 AddFilter.on_click(AddFilterFunc)
